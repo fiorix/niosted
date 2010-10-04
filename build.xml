@@ -1,0 +1,81 @@
+<project basedir="./" default="all">
+	
+	<tstamp>
+	   <format property="Build.timestamp" pattern="yyyy-MM-dd hh:mm:ss" timezone="UTC" />
+	</tstamp>
+	<property file="${basedir}/build.properties"/>
+	
+	<path id="build.class.path">
+		<fileset dir="${Build.lib.dir}">
+            <include name="*.jar" />
+		</fileset>
+
+		<pathelement path="${Build.dir}" />
+	</path>
+
+	<target name="clean">
+		<delete dir="${Build.dir}"/>
+	</target>
+
+	<target name="compile">
+		<javac destdir="${Build.dir}" debug="off" source="1.6" fork="false">
+            <src path="${Build.src.dir}" />
+			<classpath refid="build.class.path" />
+		</javac>
+	</target>
+
+	<target name="all">
+		<antcall target="clean" />
+		<mkdir dir="${Build.dir}" />
+		<antcall target="compile" />
+		<antcall target="generate.jars" />
+		<antcall target="copy-target-jar" />
+	</target>
+
+	<target name="generate.jars">
+		<antcall target="copy-jar-resources" />
+		<antcall target="generate-jar" />
+	</target>
+
+	<target name="copy-jar-resources">
+		<copy todir="${Build.dir}">
+			<fileset dir="${Build.src.dir}">
+				<include name="**/*.xml" />
+				<include name="**/*.properties" />
+			</fileset>
+		</copy>
+	</target>
+	
+	<target name="copy-target-jar">
+		<copy todir="./">
+			<fileset dir="${Build.dir}">
+				<include name="${Build.jar.file}" />
+			</fileset>
+		</copy>
+	</target>
+		
+	<target name="copy-jar-repository">
+		<mkdir dir="${Project.Jar.Repsitory}" />
+		<copy todir="${Project.Jar.Repsitory}">
+			<fileset dir="${Build.dir}" includes="*.jar" />
+		</copy>
+	</target>
+
+	<target name="generate-jar">
+		<jar destfile="${Build.dir}/${Build.jar.file}" basedir="${Build.dir}" includes="**">
+			<manifest>
+				<attribute name="Built-By" value="${Manifest.BuiltBy}"/>
+				<attribute name="Build-Jdk" value="${java.version}"/>
+				<attribute name="Specification-Title" value="${Manifest.SpecificationTitle}"/>
+				<attribute name="Specification-Version" value="${Manifest.SpecificationVersion}"/>
+				<attribute name="Specification-Vendor" value="${Manifest.SpecificationVendor}"/>
+				<attribute name="Implementation-Title" value="${Manifest.ImplementationTitle}"/>
+				<attribute name="Implementation-Version" value="${Manifest.ImplementationVersion} - ${Build.timestamp}"/> 
+				<attribute name="Implementation-Vendor" value="${Manifest.ImplementationVendor}"/>
+				<attribute name="Main-Class" value="${Manifest.MainClass}" />
+				<attribute name="Class-Path" value="${Manifest.ClassPath}" />
+			  </manifest>
+		</jar>
+	</target>
+
+</project>
