@@ -42,7 +42,7 @@ public class FakeHTTP implements Factory
         return proto;
     }
 
-    private static class FakeProtocol extends LineReceiver
+    private class FakeProtocol extends LineReceiver
     {
         public void lineReceived(String line)
         {
@@ -66,10 +66,12 @@ public class FakeHTTP implements Factory
 
         public void connectionMade()
         {
+            /*
             InetSocketAddress peer = this.transport.getPeer();
             String ip = (String) peer.getAddress().getHostAddress();
             int port = peer.getPort();
-            //java.lang.System.out.println("new client connected: "+ip+":"+port);
+            java.lang.System.out.println("new client connected: "+ip+":"+port);
+            */
         }
 
         public void connectionLost(String reason)

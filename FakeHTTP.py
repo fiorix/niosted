@@ -26,9 +26,11 @@ from net.fiorix.niosted.protocols import LineReceiver
 
 class FakeProtocol(LineReceiver):
     def lineReceived(self, line):
-        if line:
-            print "got header:", line
-        else:
+        #if line:
+        #    print "got header:", line
+        #else:
+
+        if not line:
             self.transport.write("HTTP/1.1 200 OK\r\n"+
             "Etag: \"b32ffe9242ccde98d6e19ed4c9dbc053d4a18155\"\r\n"+
             "Content-Length: 14\r\n"+
@@ -38,10 +40,12 @@ class FakeProtocol(LineReceiver):
             self.transport.loseConnection()
 
     def connectionMade(self):
-        print "new client connected:", self.transport.getPeer()
+        #print "new client connected:", self.transport.getPeer()
+        pass
 
     def connectionLost(self, reason):
-        print "connection lost:", reason
+        #print "connection lost:", reason
+        pass
 
 class FakeFactory(Factory):
     def makeProtocol(self):
