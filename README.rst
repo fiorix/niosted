@@ -12,9 +12,7 @@ This is an experimental `Reactor <http://en.wikipedia.org/wiki/Reactor_pattern>`
 
 I recently ported `Cyclone <http://github.com/fiorix/cyclone>`_ from Twisted to `Netty <http://jboss.org/netty>`_, using `Jython <http://www.jython.org/>`_. Then I decided to write something similar to Twisted using plain Java NIO, in order to test with Cyclone and compare the results.
 
-Netty is a very nice project, but `look at these <http://blog.urbanairship.com/blog/tag/java/>`_ numbers.
-
-I ended up with clean and simple code, and very impressive results.
+Netty is a very nice project, but `look at these <http://blog.urbanairship.com/blog/tag/java/>`_ numbers. I ended up with clean and simple code, and very impressive results.
 
 
 Building
@@ -86,6 +84,7 @@ Test::
     Completed 9000 requests
     Completed 10000 requests
     Finished 10000 requests
+
 
     Server Software:        CycloneServer/0.4
     Server Hostname:        192.168.0.7
