@@ -34,7 +34,8 @@ class Application(cyclone.web.Application):
         cyclone.web.Application.__init__(self, handlers)
 
 def main():
-    cyclone.ioloop.run(Application(), port=8888, interface="0.0.0.0")
+    cyclone.ioloop.TCPServer(Application(), port=8888, interface="0.0.0.0")
+    cyclone.ioloop.run()
 
 if __name__ == "__main__":
     main()

@@ -18,26 +18,28 @@
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import net.fiorix.niosted.TCPServer;
-import net.fiorix.niosted.Factory;
-import net.fiorix.niosted.Protocol;
+import net.fiorix.niosted.Reactor;
+import net.fiorix.niosted.interfaces.IFactory;
+import net.fiorix.niosted.interfaces.IProtocol;
 import net.fiorix.niosted.protocols.LineReceiver;
 
-public class FakeHTTP implements Factory
+public class FakeHTTP implements IFactory
 {
     public static void main(final String[] args)
     {
-        Factory factory = new FakeHTTP();
+        IFactory factory = new FakeHTTP();
 
         try {
-            InetSocketAddress addr = new InetSocketAddress("0.0.0.0", 8888);
-            new Thread(new TCPServer(addr, factory)).start();
-        } catch(IOException ex) {
+            Reactor reactor = new Reactor();
+            reactor.TCPServer(new InetSocketAddress("0.0.0.0", 8888), factory);
+            reactor.TCPServer(new InetSocketAddress("0.0.0.0", 8889), factory);
+            new Thread(reactor).start();
+        } catch(Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    public Protocol makeProtocol() {
+    public IProtocol makeProtocol() {
         return new FakeProtocol();
     }
 

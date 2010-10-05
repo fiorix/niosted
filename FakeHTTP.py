@@ -20,9 +20,9 @@ import sys
 sys.path.append("niosted.jar")
 
 from java.net import InetSocketAddress
-from net.fiorix.niosted import Factory
-from net.fiorix.niosted import TCPServer
+from net.fiorix.niosted import Reactor
 from net.fiorix.niosted.protocols import LineReceiver
+from net.fiorix.niosted.interfaces import IFactory
 
 class FakeProtocol(LineReceiver):
     def lineReceived(self, line):
@@ -47,10 +47,12 @@ class FakeProtocol(LineReceiver):
         #print "connection lost:", reason
         pass
 
-class FakeFactory(Factory):
+class FakeFactory(IFactory):
     def makeProtocol(self):
         return FakeProtocol()
 
 if __name__ == "__main__":
-    addr = InetSocketAddress("0.0.0.0", 8888)
-    TCPServer(addr, FakeFactory()).run()
+    reactor = Reactor()
+    reactor.TCPServer(InetSocketAddress("0.0.0.0", 8888), FakeFactory())
+    reactor.TCPServer(InetSocketAddress("0.0.0.0", 8889), FakeFactory())
+    reactor.run()
