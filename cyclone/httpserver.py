@@ -17,7 +17,7 @@
 # under the License.
 
 from cyclone.util import log
-from net.fiorix.niosted.http import ServerProtocol
+from net.fiorix.niosted.protocols import HTTPServer
 
 import cgi
 import errno
@@ -25,7 +25,7 @@ import functools
 import time
 import urlparse
 
-class HTTPConnection(ServerProtocol):
+class HTTPConnection(HTTPServer):
     def __init__(self, factory):
         self._finish_callback = None
         self.no_keep_alive = False
@@ -49,19 +49,6 @@ class HTTPConnection(ServerProtocol):
             self._on_request_body(request_body)
         else:
             self.request_callback(self._request)
-
-    def write(self, chunk):
-        assert self._request, "Request closed"
-        self.transport.write(chunk)
-
-    def finish(self):
-        assert self._request, "Request closed"
-        self._request_finished = True
-        self._finish_request()
-
-    def _on_write_complete(self):
-        if self._request_finished:
-            self._finish_request()
 
     def _finish_request(self):
         if self.no_keep_alive:

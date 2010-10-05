@@ -15,15 +15,18 @@
 # under the License.
 */
 
-package net.fiorix.niosted.http;
+/* WORK IN PROGRESS */
+
+package net.fiorix.niosted.protocols;
 
 import java.util.concurrent.ConcurrentHashMap;
 import net.fiorix.niosted.protocols.LineReceiver;
 
-public class ServerProtocol extends LineReceiver
+public class HTTPServer extends LineReceiver
 {
     public String delimiter = "\r\n";
 
+    private boolean _request_finished = false;
     private String[] request_data = null;
     private ConcurrentHashMap headers = null;
     private StringBuffer content_buffer = null;
@@ -34,6 +37,29 @@ public class ServerProtocol extends LineReceiver
     }
 
     public void ready(String request_body)
+    {
+    }
+
+    public void write(String chunk)
+    {
+        // assert self._request, "Request closed"
+        this.transport.write(chunk);
+    }
+
+    public void finish()
+    {
+        // assert self._request, "Request closed"
+        this._request_finished = true;
+        this._finish_request();
+    }
+
+    public void _on_write_complete()
+    {
+        if(this._request_finished)
+            this._finish_request();
+    }
+
+    public void _finish_request()
     {
     }
 

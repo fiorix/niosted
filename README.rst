@@ -67,23 +67,23 @@ Run::
 Test::
 
     # ulimit -n 12000
-    # ab -n 10000 -c 25 http://192.168.0.7:8888/
+    # ab -n 100000 -c 25 http://192.168.0.7:8888/
     This is ApacheBench, Version 2.3 <$Revision: 655654 $>
     Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
     Licensed to The Apache Software Foundation, http://www.apache.org/
 
     Benchmarking 192.168.0.7 (be patient)
-    Completed 1000 requests
-    Completed 2000 requests
-    Completed 3000 requests
-    Completed 4000 requests
-    Completed 5000 requests
-    Completed 6000 requests
-    Completed 7000 requests
-    Completed 8000 requests
-    Completed 9000 requests
     Completed 10000 requests
-    Finished 10000 requests
+    Completed 20000 requests
+    Completed 30000 requests
+    Completed 40000 requests
+    Completed 50000 requests
+    Completed 60000 requests
+    Completed 70000 requests
+    Completed 80000 requests
+    Completed 90000 requests
+    Completed 100000 requests
+    Finished 100000 requests
 
 
     Server Software:        CycloneServer/0.4
@@ -94,23 +94,23 @@ Test::
     Document Length:        14 bytes
 
     Concurrency Level:      25
-    Time taken for tests:   2.085 seconds
-    Complete requests:      10000
+    Time taken for tests:   19.406 seconds
+    Complete requests:      100000
     Failed requests:        0
     Write errors:           0
-    Total transferred:      1700000 bytes
-    HTML transferred:       140000 bytes
-    Requests per second:    4796.87 [#/sec] (mean)
-    Time per request:       5.212 [ms] (mean)
-    Time per request:       0.208 [ms] (mean, across all concurrent requests)
-    Transfer rate:          796.36 [Kbytes/sec] received
+    Total transferred:      17000170 bytes
+    HTML transferred:       1400014 bytes
+    Requests per second:    5152.93 [#/sec] (mean)
+    Time per request:       4.852 [ms] (mean)
+    Time per request:       0.194 [ms] (mean, across all concurrent requests)
+    Transfer rate:          855.48 [Kbytes/sec] received
 
     Connection Times (ms)
                   min  mean[+/-sd] median   max
-    Connect:        0    0   0.1      0       3
-    Processing:     1    5   3.0      5      48
-    Waiting:        1    5   3.0      5      48
-    Total:          2    5   3.0      5      48
+    Connect:        0    1  27.6      0    1007
+    Processing:     0    4   3.1      4     364
+    Waiting:        0    4   3.1      4     364
+    Total:          1    5  27.7      5    1008
 
     Percentage of the requests served within a certain time (ms)
       50%      5
@@ -120,8 +120,8 @@ Test::
       90%      5
       95%      5
       98%      6
-      99%      9
-     100%     48 (longest request)
+      99%      6
+     100%   1008 (longest request)
 
 
 Fake HTTP server (jython version)
@@ -142,23 +142,23 @@ Run::
 Test::
 
     # ulimit -n 12000
-    # ab -n 10000 -c 25 http://192.168.0.7:8888/
+    # ab -n 100000 -c 25 http://192.168.0.7:8888/
     This is ApacheBench, Version 2.3 <$Revision: 655654 $>
     Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
     Licensed to The Apache Software Foundation, http://www.apache.org/
 
     Benchmarking 192.168.0.7 (be patient)
-    Completed 1000 requests
-    Completed 2000 requests
-    Completed 3000 requests
-    Completed 4000 requests
-    Completed 5000 requests
-    Completed 6000 requests
-    Completed 7000 requests
-    Completed 8000 requests
-    Completed 9000 requests
     Completed 10000 requests
-    Finished 10000 requests
+    Completed 20000 requests
+    Completed 30000 requests
+    Completed 40000 requests
+    Completed 50000 requests
+    Completed 60000 requests
+    Completed 70000 requests
+    Completed 80000 requests
+    Completed 90000 requests
+    Completed 100000 requests
+    Finished 100000 requests
 
 
     Server Software:        CycloneServer/0.4
@@ -169,23 +169,23 @@ Test::
     Document Length:        14 bytes
 
     Concurrency Level:      25
-    Time taken for tests:   3.554 seconds
-    Complete requests:      10000
+    Time taken for tests:   35.778 seconds
+    Complete requests:      100000
     Failed requests:        0
     Write errors:           0
-    Total transferred:      1700000 bytes
-    HTML transferred:       140000 bytes
-    Requests per second:    2813.68 [#/sec] (mean)
-    Time per request:       8.885 [ms] (mean)
-    Time per request:       0.355 [ms] (mean, across all concurrent requests)
-    Transfer rate:          467.12 [Kbytes/sec] received
+    Total transferred:      17000000 bytes
+    HTML transferred:       1400000 bytes
+    Requests per second:    2794.99 [#/sec] (mean)
+    Time per request:       8.945 [ms] (mean)
+    Time per request:       0.358 [ms] (mean, across all concurrent requests)
+    Transfer rate:          464.01 [Kbytes/sec] received
 
     Connection Times (ms)
                   min  mean[+/-sd] median   max
-    Connect:        0    0   0.1      0       4
-    Processing:     1    9   3.1      8      49
-    Waiting:        1    9   3.1      8      49
-    Total:          3    9   3.1      9      50
+    Connect:        0    0   9.1      0     928
+    Processing:     1    9   1.4      8     311
+    Waiting:        1    9   1.4      8     311
+    Total:          2    9   9.2      9     936
 
     Percentage of the requests served within a certain time (ms)
       50%      9
@@ -193,10 +193,10 @@ Test::
       75%      9
       80%      9
       90%      9
-      95%      9
-      98%     11
+      95%     12
+      98%     13
       99%     13
-     100%     50 (longest request)
+     100%    936 (longest request)
 
 
 Cyclone (jython version)
