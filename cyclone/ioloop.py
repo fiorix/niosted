@@ -18,13 +18,16 @@
 
 import cyclone.web
 
-from java.lang import Thread
 from java.net import InetSocketAddress
-from net.fiorix.niosted import TCPServer
+from net.fiorix.niosted import Reactor
 
-def run(application, port=8888, interface="127.0.0.1"):
+reactor = Reactor()
+
+def TCPServer(application, port=8888, interface="127.0.0.1"):
     if not isinstance(application, cyclone.web.Application):
         raise TypeError("application should be an instance of tornetty.web.Application")
 
-    #Thread(TCPServer(InetSocketAddress(interface, port), application)).start()
-    TCPServer(InetSocketAddress(interface, port), application).run()
+    reactor.TCPServer(InetSocketAddress(interface, port), application)
+
+def run():
+    reactor.run()
