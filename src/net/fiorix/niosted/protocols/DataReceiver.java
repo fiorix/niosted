@@ -17,14 +17,14 @@
 
 package net.fiorix.niosted.protocols;
 
-import net.fiorix.niosted.Factory;
-import net.fiorix.niosted.Protocol;
-import net.fiorix.niosted.Transport;
+import net.fiorix.niosted.interfaces.IFactory;
+import net.fiorix.niosted.interfaces.IProtocol;
+import net.fiorix.niosted.interfaces.ITransport;
 
-public class DataReceiver implements Protocol
+public class DataReceiver implements IProtocol
 {
-    protected Factory factory;
-    protected Transport transport;
+    public IFactory factory;
+    public ITransport transport;
 
     public void dataReceived(byte[] data)
     {
@@ -38,14 +38,14 @@ public class DataReceiver implements Protocol
     {
     }
 
-    public void initialize(Factory factory, Transport transport)
+    public void initialize(IFactory factory, ITransport transport)
     {
         this.factory = factory;
         this.transport = transport;
         this.connectionMade();
     }
 
-    public Transport getTransport()
+    public ITransport getTransport()
     {
         return this.transport;
     }
