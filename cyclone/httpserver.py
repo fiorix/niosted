@@ -17,7 +17,7 @@
 # under the License.
 
 from cyclone.util import log
-from net.fiorix.niosted.protocols import LineReceiver
+from net.fiorix.niosted.http import ServerProtocol
 
 import cgi
 import errno
@@ -25,41 +25,31 @@ import functools
 import time
 import urlparse
 
-class HTTPConnection(LineReceiver):
-    delimiter = "\r\n"
-
+class HTTPConnection(ServerProtocol):
     def __init__(self, factory):
-        self._headersbuffer = []
-        self._contentbuffer = []
         self._finish_callback = None
         self.no_keep_alive = False
-        self.content_length = None
         self.request_callback = factory
         self.xheaders = factory.settings.get('xheaders', False)
         self._request = None
         self._request_finished = False
 
-    def lineReceived(self, line):
-        if line:
-            self._headersbuffer.append(line+self.delimiter)
+    def prepare(self, method, uri, version, headers):
+        hdrs = HTTPHeaders()
+        for m in headers.entrySet():
+            hdrs[m.getKey()] = m.getValue()
+
+        peer = self.transport.getPeer()
+        self._request = HTTPRequest(
+            connection=self, method=method, uri=uri, version=version,
+            headers=headers, remote_ip=peer.getAddress().getHostAddress())
+
+    def ready(self, request_body):
+        if(request_body):
+            self._on_request_body(request_body)
         else:
-            self._on_headers(''.join(self._headersbuffer))
-            self._headersbuffer = []
-    
-    def rawDataReceived(self, data):
-        if self.content_length is not None:
-            data, rest = data[:self.content_length], data[self.content_length:]
-            self.content_length -= len(data)
-        else:
-            rest = ''
-	
-        self._contentbuffer.append(data)
-        if self.content_length == 0:
-            self._on_request_body(''.join(self._contentbuffer))
-            self._contentbuffer = []
-            self.content_length = None
-            self.setLineMode(rest)
-	    
+            self.request_callback(self._request)
+
     def write(self, chunk):
         assert self._request, "Request closed"
         self.transport.write(chunk)
@@ -89,38 +79,6 @@ class HTTPConnection(LineReceiver):
         self._request_finished = False
         if disconnect:
             self.transport.loseConnection()
-
-    def _on_headers(self, data):
-        eol = data.find("\r\n")
-        start_line = data[:eol]
-        try:
-            method, uri, version = start_line.split(" ")
-        except:
-            log.err("Malformed HTTP request: %s" % repr(start_line)[:100])
-            return self.transport.loseConnection()
-        if not version.startswith("HTTP/"):
-            #raise Exception("Malformed HTTP version in HTTP Request-Line")
-            log.err("Malformed HTTP version in HTTP Request-Line: %s" % repr(start_line)[:100])
-            return self.transport.loseConnection()
-        try:
-            headers = HTTPHeaders.parse(data[eol:])
-        except:
-            log.err("Malformed HTTP headers: %s" % repr(data[eol:][:100]))
-            return self.transport.loseConnection()
-
-        self._request = HTTPRequest(
-            connection=self, method=method, uri=uri, version=version,
-            headers=headers, remote_ip="127.0.0.1") # self.transport.getPeer().host)
-
-        content_length = int(headers.get("Content-Length", 0))
-        if content_length:
-            if headers.get("Expect") == "100-continue":
-                self.transport.write("HTTP/1.1 100 (Continue)\r\n\r\n")
-            self.content_length = content_length
-            self.setRawMode()
-            return
-
-        self.request_callback(self._request)
 
     def _on_request_body(self, data):
         self._request.body = data

@@ -44,7 +44,7 @@ public class LineReceiver extends DataReceiver
     public void setLineMode(String extra)
     {
         this.linemode = true;
-        this._dataReceived(extra);
+        this.dataReceived(extra);
     }
 
     public void setRawMode()
@@ -54,33 +54,28 @@ public class LineReceiver extends DataReceiver
 
     public void dataReceived(byte[] data)
     {
-        this._dataReceived(new String(data));
+        this.dataReceived(new String(data));
     }
 
-    private void _dataReceived(String data)
+    private void dataReceived(String data)
     {
         this.ibuffer += data;
         while(this.linemode) {
-            if(this.ibuffer.contentEquals(this.delimiter)) {
-                this.lineReceived("");
-                break;
-            }
+            if(this.transport.isClosed()) break;
 
             String[] temp = this.ibuffer.split(this.delimiter, 2);
-            String line = temp[0].replace(this.delimiter, "");
-            this.ibuffer = temp.length > 1 ? temp[1] : "";
+            String line = temp[0];
+            this.ibuffer = temp[1];
 
-            int linelength = line.length();
-            if(linelength == 0) {
-                break;
-            } else if(linelength > this.max_length) {
+            if(line.length() > this.max_length) {
                 String exceeded = line + this.ibuffer;
                 this.ibuffer = "";
                 this.lineLengthExceeded(exceeded);
                 return;
             }
 
-            this.lineReceived(line);
+            this.lineReceived(line.contentEquals("") ? null : line);
+            if(this.ibuffer.length() == 0) break;
         } 
 
         if(!this.linemode) {

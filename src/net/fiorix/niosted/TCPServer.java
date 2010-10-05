@@ -22,9 +22,9 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.Map;
 import java.util.Iterator;
-import java.util.ArrayList;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import java.net.InetSocketAddress;
 
@@ -184,7 +184,7 @@ public class TCPServer implements Reactor, Runnable
         private Protocol protocol = null;
         private Reactor reactor = null;
         private SocketChannel client = null;
-        private ArrayList writeBuffer = new ArrayList();
+        private ConcurrentLinkedQueue writeBuffer = new ConcurrentLinkedQueue();
 
         public TCPTransport(Reactor reactor, Protocol protocol, SocketChannel client)
         {
@@ -229,7 +229,7 @@ public class TCPServer implements Reactor, Runnable
             if(!this.flushing) {
                 try { 
                     this.client.close();
-                    this.protocol.connectionLost("connection closed cleanly");
+                    this.protocol.connectionLost("connection closed by remote peer");
                 }
                 catch(IOException ex) {
                     ex.printStackTrace();
@@ -255,16 +255,15 @@ public class TCPServer implements Reactor, Runnable
         public void __doWrite(SelectionKey key)
         {
             while(!this.writeBuffer.isEmpty()) {
-                ByteBuffer buffer = (ByteBuffer) this.writeBuffer.get(0);
+                ByteBuffer buffer = (ByteBuffer) this.writeBuffer.peek();
                 try {
                     this.client.write(buffer);
                 } catch(IOException ex) {
-                    this.writeBuffer.clear();
                     this.reactor.connectionLost(key, this.client, ex.getMessage());
                     return;
                 }
                 if(buffer.remaining() >= 1) break;
-                this.writeBuffer.remove(0);
+                this.writeBuffer.remove(buffer);
             }
 
             this.flushing = false;

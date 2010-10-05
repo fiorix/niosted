@@ -38,8 +38,7 @@ public class FakeHTTP implements Factory
     }
 
     public Protocol makeProtocol() {
-        Protocol proto = new FakeProtocol();
-        return proto;
+        return new FakeProtocol();
     }
 
     private class FakeProtocol extends LineReceiver
@@ -47,12 +46,12 @@ public class FakeHTTP implements Factory
         public void lineReceived(String line)
         {
             /*
-            if(line.length() >= 1)
+            if(line != null)
                 java.lang.System.out.println("got header: "+line);
             else {
             */
 
-            if(line.length() == 0) {
+            if(line == null) {
                 this.transport.write(
                     "HTTP/1.1 200 OK\r\n"+
                     "Etag: \"b32ffe9242ccde98d6e19ed4c9dbc053d4a18155\"\r\n"+
