@@ -64,7 +64,8 @@ public class TCPServer implements Reactor, Runnable
 
     public void connectionLost(SelectionKey key, SocketChannel client, String reason)
     {
-        key.cancel();
+        if(key != null)
+            key.cancel();
         try { client.close(); } catch(IOException ign) {}
         Protocol proto = (Protocol) this.connections.get(client);
         if(proto != null) {
@@ -146,7 +147,7 @@ public class TCPServer implements Reactor, Runnable
         }
 
         if(bytes == -1) {
-            this.connectionLost(key, client, "client disconnected");
+            this.connectionLost(key, client, "connection closed by remote peer");
             return;
         }
 
@@ -183,11 +184,13 @@ public class TCPServer implements Reactor, Runnable
         private boolean autoFlush = true;
         private Protocol protocol = null;
         private Reactor reactor = null;
+        private SelectionKey key = null;
         private SocketChannel client = null;
         private ConcurrentLinkedQueue writeBuffer = new ConcurrentLinkedQueue();
 
         public TCPTransport(Reactor reactor, Protocol protocol, SocketChannel client)
         {
+            this.key = key;
             this.client = client;
             this.reactor = reactor;
             this.protocol = protocol;
@@ -226,15 +229,8 @@ public class TCPServer implements Reactor, Runnable
                 this.flush();
 
             this.closed = true;
-            if(!this.flushing) {
-                try { 
-                    this.client.close();
-                    this.protocol.connectionLost("connection closed by remote peer");
-                }
-                catch(IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
+            if(!this.flushing)
+                this.reactor.connectionLost(null, this.client, "connection closed cleanly");
         }
 
         public InetSocketAddress getPeer()
