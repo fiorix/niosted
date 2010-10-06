@@ -39,6 +39,7 @@ public class TCPTransport implements ITransport
     private IReactor reactor = null;
     private SelectionKey key = null;
     private SocketChannel channel = null;
+    private ByteBuffer readBuffer = ByteBuffer.allocate(4096);
     private ConcurrentLinkedQueue writeBuffer = new ConcurrentLinkedQueue();
 
     public TCPTransport(IReactor reactor, SocketChannel channel, IProtocol protocol)
@@ -93,6 +94,32 @@ public class TCPTransport implements ITransport
     public boolean isClosed()
     {
         return this.closed;
+    }
+
+    public void __read(SelectionKey key)
+    {
+        int bytes = -1;
+
+        try {
+            bytes = this.channel.read(this.readBuffer);
+        } catch(IOException ex) {
+            this.readBuffer.clear();
+            this.reactor.connectionLost(key, this.channel, ex.getMessage());
+            return;
+        }
+
+        if(bytes == -1) {
+            this.readBuffer.clear();
+            this.reactor.connectionLost(key, this.channel, "connection closed by remote peer");
+            return;
+        }
+
+        byte[] data = new byte[bytes];
+        System.arraycopy(this.readBuffer.array(), 0, data, 0, bytes);
+        this.readBuffer.clear();
+
+        if(!this.closed)
+            this.protocol.dataReceived(data);
     }
 
     public void __write(SelectionKey key)

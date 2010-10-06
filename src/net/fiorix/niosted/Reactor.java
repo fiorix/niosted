@@ -40,7 +40,6 @@ public class Reactor implements IReactor, Runnable
 {
     private boolean ioloop = true;
     private Selector selector = null;
-    private ByteBuffer readBuffer = ByteBuffer.allocate(8192);
     private ConcurrentHashMap sockets = new ConcurrentHashMap();
     private ConcurrentHashMap factories = new ConcurrentHashMap();
     private ConcurrentHashMap operations = new ConcurrentHashMap();
@@ -154,31 +153,9 @@ public class Reactor implements IReactor, Runnable
     {
         SocketChannel channel = (SocketChannel) key.channel();
         IProtocol protocol = (IProtocol) this.sockets.get(channel);
-        if(protocol == null) return;
-
-        int bytes = -1;
-
-        try {
-            bytes = channel.read(this.readBuffer);
-        } catch(IOException ex) {
-            this.readBuffer.clear();
-            this.connectionLost(key, channel, ex.getMessage());
-            return;
-        }
-
-        if(bytes == -1) {
-            this.readBuffer.clear();
-            this.connectionLost(key, channel, "connection closed by remote peer");
-            return;
-        }
-
-        byte[] data = new byte[bytes];
-        System.arraycopy(this.readBuffer.array(), 0, data, 0, bytes);
-        this.readBuffer.clear();
-
-        ITransport transport = protocol.getTransport();
-        if(!transport.isClosed()) {
-            protocol.dataReceived(data);
+        if(protocol != null) {
+            ITransport transport = protocol.getTransport();
+            transport.__read(key);
         }
     }
 
@@ -186,10 +163,10 @@ public class Reactor implements IReactor, Runnable
     {
         SocketChannel channel = (SocketChannel) key.channel();
         IProtocol protocol = (IProtocol) this.sockets.get(channel);
-        if(protocol == null) return;
-
-        ITransport transport = protocol.getTransport();
-        transport.__write(key);
+        if(protocol != null) {
+            ITransport transport = protocol.getTransport();
+            transport.__write(key);
+        }
     }
 
     public void run()

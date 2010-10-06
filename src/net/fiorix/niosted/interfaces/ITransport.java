@@ -30,5 +30,6 @@ public interface ITransport
     public void loseConnection();
     public InetSocketAddress getPeer();
     public boolean isClosed();
+    public void __read(SelectionKey key);
     public void __write(SelectionKey key);
 }
