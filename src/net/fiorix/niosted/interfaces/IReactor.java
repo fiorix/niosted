@@ -17,12 +17,23 @@
 
 package net.fiorix.niosted.interfaces;
 
+import net.fiorix.niosted.Factory;
+import net.fiorix.niosted.ClientFactory;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+
 import java.nio.channels.Selector;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 public interface IReactor
 {
+    public void stop();
+
+    public void TCPServer(InetSocketAddress addr, Factory factory) throws IOException;
+    public void TCPClient(InetSocketAddress addr, ClientFactory factory) throws IOException;
+
     public void setInterestOps(SocketChannel channel, int op);
     public void connectionLost(SelectionKey key, SocketChannel client, String reason);
 }

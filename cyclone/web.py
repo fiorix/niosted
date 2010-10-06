@@ -19,7 +19,7 @@
 from cyclone.util import log
 from cyclone import __version__, escape, template, httpserver
 
-from net.fiorix.niosted.interfaces import IFactory
+from net.fiorix.niosted import Factory
 
 import base64
 import binascii
@@ -1031,8 +1031,8 @@ def addslash(method):
     return wrapper
 
 
-class Application(IFactory):
-    def makeProtocol(self):
+class Application(Factory):
+    def buildProtocol(self):
         return httpserver.HTTPConnection(self)
 
     def __init__(self, handlers=None, default_host="", transforms=None, **settings):

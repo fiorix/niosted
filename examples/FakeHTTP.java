@@ -19,15 +19,15 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import net.fiorix.niosted.Reactor;
-import net.fiorix.niosted.interfaces.IFactory;
+import net.fiorix.niosted.Factory;
 import net.fiorix.niosted.interfaces.IProtocol;
 import net.fiorix.niosted.protocols.LineReceiver;
 
-public class FakeHTTP implements IFactory
+public class FakeHTTP extends Factory
 {
     public static void main(final String[] args)
     {
-        IFactory factory = new FakeHTTP();
+        Factory factory = new FakeHTTP();
 
         try {
             Reactor reactor = new Reactor();
@@ -39,7 +39,7 @@ public class FakeHTTP implements IFactory
         }
     }
 
-    public IProtocol makeProtocol() {
+    public IProtocol buildProtocol() {
         return new FakeProtocol();
     }
 

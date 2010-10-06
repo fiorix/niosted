@@ -113,6 +113,6 @@ public class TCPTransport implements ITransport
         if(this.closed)
             this.loseConnection();
         else
-            key.interestOps(SelectionKey.OP_READ);
+            this.reactor.setInterestOps(this.channel, SelectionKey.OP_READ);
     }
 }

@@ -15,37 +15,27 @@
 # under the License.
 */
 
-package net.fiorix.niosted.protocols;
+package net.fiorix.niosted;
 
+import net.fiorix.niosted.interfaces.IReactor;
 import net.fiorix.niosted.interfaces.IFactory;
 import net.fiorix.niosted.interfaces.IProtocol;
-import net.fiorix.niosted.interfaces.ITransport;
+import net.fiorix.niosted.interfaces.IClientFactory;
 
-public class DataReceiver implements IProtocol
+import java.net.InetSocketAddress;
+
+public class ClientFactory implements IFactory, IClientFactory
 {
-    public IFactory factory;
-    public ITransport transport;
+    public IProtocol buildProtocol()
+    {
+        throw new UnsupportedOperationException("missing method ClientFactory.buildProtocol");
+    }
 
-    public void dataReceived(byte[] data)
+    public void clientConnectionLost(IReactor reactor, InetSocketAddress addr, String reason)
     {
     }
 
-    public void connectionMade()
+    public void clientConnectionFailed(IReactor reactor, InetSocketAddress addr, String reason)
     {
-    }
-
-    public void connectionLost(String reason)
-    {
-    }
-
-    public void initialize(IFactory factory, ITransport transport)
-    {
-        this.factory = factory;
-        this.transport = transport;
-    }
-
-    public ITransport getTransport()
-    {
-        return this.transport;
     }
 }

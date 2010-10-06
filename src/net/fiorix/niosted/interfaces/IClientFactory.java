@@ -19,7 +19,8 @@ package net.fiorix.niosted.interfaces;
 
 import java.net.InetSocketAddress;
 
-public interface IFactory
+public interface IClientFactory
 {
-    public IProtocol buildProtocol();
+    public void clientConnectionLost(IReactor reactor, InetSocketAddress addr, String reason);
+    public void clientConnectionFailed(IReactor reactor, InetSocketAddress addr, String reason);
 }

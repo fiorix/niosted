@@ -18,7 +18,7 @@
 	</target>
 
 	<target name="compile">
-		<javac destdir="${Build.dir}" debug="on" source="1.6" fork="false">
+		<javac destdir="${Build.dir}" debug="off" source="1.6" fork="false">
             <src path="${Build.src.dir}" />
 			<classpath refid="build.class.path" />
 		</javac>

@@ -38,6 +38,7 @@ import java.nio.channels.spi.SelectorProvider;
 
 public class Reactor implements IReactor, Runnable
 {
+    private boolean ioloop = true;
     private Selector selector = null;
     private ByteBuffer readBuffer = ByteBuffer.allocate(8192);
     private ConcurrentHashMap sockets = new ConcurrentHashMap();
@@ -46,16 +47,32 @@ public class Reactor implements IReactor, Runnable
 
     public Reactor() throws IOException
     {
-        this.selector = SelectorProvider.provider().openSelector();
+        this.selector = Selector.open();
+        //this.selector = SelectorProvider.provider().openSelector();
     }
 
-    public void TCPServer(InetSocketAddress addr, IFactory factory) throws IOException
+    public void stop()
+    {
+        this.ioloop = false;
+    }
+
+    public void TCPServer(InetSocketAddress addr, Factory factory) throws IOException
     {
         ServerSocketChannel channel = ServerSocketChannel.open();
-        channel.configureBlocking(false);
-        channel.socket().bind(addr);
-        channel.register(selector, SelectionKey.OP_ACCEPT);
         this.factories.put(channel, factory);
+        channel.configureBlocking(false);
+        channel.register(this.selector, SelectionKey.OP_ACCEPT);
+        channel.socket().bind(addr);
+    }
+
+    public void TCPClient(InetSocketAddress addr, ClientFactory factory) throws IOException
+    {
+        SocketChannel channel = SocketChannel.open();
+        this.sockets.put(channel, addr);
+        this.factories.put(channel, factory);
+        channel.configureBlocking(false);
+        channel.register(this.selector, SelectionKey.OP_CONNECT);
+        channel.connect(addr);
     }
 
     public void setInterestOps(SocketChannel channel, int op)
@@ -77,6 +94,15 @@ public class Reactor implements IReactor, Runnable
             protocol.connectionLost(reason);
             this.sockets.remove(channel);
         }
+
+        /* remove factory when it's a client */
+        Object obj = (Object) this.factories.get(channel);
+        if(obj instanceof ClientFactory) {
+            ClientFactory factory = (ClientFactory) obj;
+            factory.clientConnectionLost(this, 
+                (InetSocketAddress) channel.socket().getRemoteSocketAddress(), reason);
+            this.factories.remove(channel);
+        }
     }
 
     private void onAccept(SelectionKey key) throws IOException
@@ -86,12 +112,42 @@ public class Reactor implements IReactor, Runnable
         client.configureBlocking(false);
 
         IFactory factory = (IFactory) this.factories.get(server);
-        IProtocol protocol = factory.makeProtocol();
+        IProtocol protocol = factory.buildProtocol();
         protocol.initialize(factory, (new TCPTransport(this, client, protocol)));
         this.sockets.put(client, protocol);
 
         client.register(this.selector, SelectionKey.OP_READ);
         this.selector.wakeup();
+        protocol.connectionMade();
+
+    }
+
+    private void onConnect(SelectionKey key) throws IOException
+    {
+        String failure = null;
+        SocketChannel channel = (SocketChannel) key.channel();
+        try {
+            if(!channel.finishConnect()) return;
+        } catch(IOException ex) {
+            failure = ex.getMessage();
+        }
+
+        ClientFactory factory = (ClientFactory) this.factories.get(channel);
+        IProtocol protocol = factory.buildProtocol();
+
+        if(failure == null) {
+            protocol.initialize(factory, (new TCPTransport(this, channel, protocol)));
+            this.sockets.put(channel, protocol);
+
+            channel.register(this.selector, SelectionKey.OP_READ);
+            this.selector.wakeup();
+            protocol.connectionMade();
+        } else {
+            /* client connection failed */
+            InetSocketAddress addr = (InetSocketAddress) this.sockets.get(channel);
+            this.sockets.remove(channel);
+            factory.clientConnectionFailed(this, addr, failure);
+        }
     }
 
     private void onRead(SelectionKey key)
@@ -144,8 +200,9 @@ public class Reactor implements IReactor, Runnable
 
     public void run()
     {
-        while(true) { /* ioloop */
+        while(this.ioloop) { /* ioloop */
 
+        boolean pending = !this.operations.isEmpty();
         Set<Map.Entry<SocketChannel, Integer>> ops = this.operations.entrySet();
         if(ops != null) {
             for(Map.Entry<SocketChannel, Integer> item: ops) {
@@ -159,8 +216,10 @@ public class Reactor implements IReactor, Runnable
                 }
                 this.operations.remove(channel);
             }
-            this.selector.wakeup();
         }
+
+        if(pending)
+            this.selector.wakeup();
 
         try {
             this.selector.select();
@@ -174,14 +233,24 @@ public class Reactor implements IReactor, Runnable
             SelectionKey key = (SelectionKey) iter.next();
             iter.remove();
 
-            if(!key.isValid()) continue;
-            else if(key.isAcceptable()) {
+            if(!key.isValid()) {
+                continue;
+
+            } else if(key.isAcceptable()) {
                 try {
                     this.onAccept(key);
                 } catch(IOException ex) {
                     ex.printStackTrace();
                 }
-            } 
+
+            } else if(key.isConnectable()) {
+                try {
+                    this.onConnect(key);
+                } catch(IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+
             else if(key.isReadable()) this.onRead(key);
             else if(key.isWritable()) this.onWrite(key);
         }

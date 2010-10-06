@@ -15,11 +15,17 @@
 # under the License.
 */
 
-package net.fiorix.niosted.interfaces;
+package net.fiorix.niosted;
+
+import net.fiorix.niosted.interfaces.IFactory;
+import net.fiorix.niosted.interfaces.IProtocol;
 
 import java.net.InetSocketAddress;
 
-public interface IFactory
+public class Factory implements IFactory
 {
-    public IProtocol buildProtocol();
+    public IProtocol buildProtocol()
+    {
+        throw new UnsupportedOperationException("missing method Factory.buildProtocol");
+    }
 }
