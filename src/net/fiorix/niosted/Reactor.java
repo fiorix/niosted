@@ -81,8 +81,10 @@ public class Reactor implements IReactor, Runnable
 
     public void connectionLost(SelectionKey key, SocketChannel channel, String reason)
     {
-        if(key != null)
-            key.cancel();
+        if(key == null)
+            key = channel.keyFor(this.selector);
+
+        key.cancel();
 
         try {
             channel.close();
@@ -132,9 +134,9 @@ public class Reactor implements IReactor, Runnable
         }
 
         ClientFactory factory = (ClientFactory) this.factories.get(channel);
-        IProtocol protocol = factory.buildProtocol();
 
         if(failure == null) {
+            IProtocol protocol = factory.buildProtocol();
             protocol.initialize(factory, (new TCPTransport(this, channel, protocol)));
             this.sockets.put(channel, protocol);
 
@@ -178,6 +180,7 @@ public class Reactor implements IReactor, Runnable
         if(ops != null) {
             for(Map.Entry<SocketChannel, Integer> item: ops) {
                 SocketChannel channel = (SocketChannel) item.getKey();
+                this.operations.remove(channel);
                 if(this.sockets.containsKey(channel)) {
                     SelectionKey key = channel.keyFor(this.selector);
                     if(key != null) {
@@ -185,7 +188,6 @@ public class Reactor implements IReactor, Runnable
                         key.interestOps(op);
                     }
                 }
-                this.operations.remove(channel);
             }
         }
 

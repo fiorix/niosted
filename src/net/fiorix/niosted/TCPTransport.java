@@ -37,7 +37,6 @@ public class TCPTransport implements ITransport
     private boolean autoFlush = true;
     private IProtocol protocol = null;
     private IReactor reactor = null;
-    private SelectionKey key = null;
     private SocketChannel channel = null;
     private ByteBuffer readBuffer = ByteBuffer.allocate(4096);
     private ConcurrentLinkedQueue writeBuffer = new ConcurrentLinkedQueue();
