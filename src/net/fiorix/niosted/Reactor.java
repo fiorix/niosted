@@ -61,8 +61,8 @@ public class Reactor implements IReactor, Runnable
         ServerSocketChannel channel = ServerSocketChannel.open();
         this.factories.put(channel, factory);
         channel.configureBlocking(false);
-        channel.register(this.selector, SelectionKey.OP_ACCEPT);
         channel.socket().bind(addr);
+        channel.register(this.selector, SelectionKey.OP_ACCEPT);
     }
 
     public void TCPClient(InetSocketAddress addr, ClientFactory factory) throws IOException
