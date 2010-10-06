@@ -157,34 +157,28 @@ public class Reactor implements IReactor, Runnable
         if(protocol == null) return;
 
         int bytes = -1;
-        byte[] data = null;
-        String error = null;
 
-        synchronized(this.readBuffer) {
-            try {
-                bytes = channel.read(this.readBuffer);
-            } catch(IOException ex) {
-                this.readBuffer.clear();
-                error = ex.getMessage();
-            }
-
-            if(bytes == -1) {
-                this.readBuffer.clear();
-                error = new String("connection closed by remote peer");
-            } else {
-                data = new byte[bytes];
-                System.arraycopy(this.readBuffer.array(), 0, data, 0, bytes);
-                this.readBuffer.clear();
-            }
+        try {
+            bytes = channel.read(this.readBuffer);
+        } catch(IOException ex) {
+            this.readBuffer.clear();
+            this.connectionLost(key, channel, ex.getMessage());
+            return;
         }
 
-        if(error != null) {
-            this.connectionLost(key, channel, error);
-        } else {
-            ITransport transport = protocol.getTransport();
-            if(!transport.isClosed()) {
-                protocol.dataReceived(data);
-            }
+        if(bytes == -1) {
+            this.readBuffer.clear();
+            this.connectionLost(key, channel, "connection closed by remote peer");
+            return;
+        }
+
+        byte[] data = new byte[bytes];
+        System.arraycopy(this.readBuffer.array(), 0, data, 0, bytes);
+        this.readBuffer.clear();
+
+        ITransport transport = protocol.getTransport();
+        if(!transport.isClosed()) {
+            protocol.dataReceived(data);
         }
     }
 
