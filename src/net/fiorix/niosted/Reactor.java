@@ -77,6 +77,7 @@ public class Reactor implements IReactor, Runnable
     public void setInterestOps(SocketChannel channel, int op)
     {
         this.operations.put(channel, op);
+        this.selector.wakeup();
     }
 
     public void connectionLost(SelectionKey key, SocketChannel channel, String reason)
